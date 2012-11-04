@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "name": "Chrome Music Player",
+  "version": "0.0.1",
+  "permissions": [
+    "experimental",
+    {
+      "mediaGalleries": [
+        "read",
+        "allAutoDetected"
+      ]
+    }
+  ],
+  "app": {
+    "background": {
+      "scripts": [
+        "js/filer.js",
+        "js/ChromeMusicPlayer.js",
+        "js/background.js",
+        "js/id3/stringutils.js",
+        "js/id3/bufferedbinaryajax.js",
+        "js/id3/filereader.js",
+        "js/id3/base64.js",
+        "js/id3/id3.js",
+        "js/id3/id3v1.js",
+        "js/id3/id3v2.js",
+        "js/id3/id3v2frames.js",
+        "js/id3/id4.js"
+      ]
+    }
+  },
+  "minimum_chrome_version": "24"
+}

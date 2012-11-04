@@ -1,0 +1,67 @@
+<!doctype html>
+<html xmlns:og="http://ogp.me/ns#" ng-app="ChromeMusicPlayer" ng-csp>
+  <head>
+    <meta charset="utf-8">
+    <title>Chrome Music Player</title>
+    <meta name="viewport" content="width=device-width">
+
+    <!-- <link rel="stylesheet" href="css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/angular.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/controllers.js"></script>
+  </head>
+  <body>
+    <div class="app-container" ng-controller="MediaControlCtrl">
+      <div class="app-control">
+        <div class="left">
+          <button class="btn" ng-click="backward()" disabled>&lt;&lt;</button>
+          <button class="btn" ng-click="play_stop()">{{play_stop_label}}</button>
+          <button class="btn" ng-click="forward()" disabled>&gt;&gt;</button>
+          <input type="range" min="0" step="0.01" max="1" value="1" style="width:100px" ng-model="player.player.volume">
+        </div>
+        <div class="center">
+          <div>{{player.info.title}}</div>
+          <div>{{player.info.artist}} - {{player.info.album}}</div>
+          <div class="progress">
+            <span>{{player.player.currentTime|date:'mm:ss'}}</span>&nbsp;
+            <progress value="0" max="100"></progress>&nbsp;
+            <span>{{player.player.duration|date:'mm:ss'}}</span>
+          </div>
+        </div>
+        <div class="right">
+          <input type="search" ng-model="query" value="" placeholder="Search Music">
+        </div>
+      </div>
+      <div class="app-main">
+        <div class="app-sidebar">
+          <input type="button" class="btn" value="Load music" placeholder="" ng-click="reload()">
+          <p style="color:#aaa; font-size: 0.75em;">it takes a while to load all your music depending on how many audio files you have on your local disk.</p>
+          <div class="artwork">
+            <img src="{{player.info.artwork}}" alt="">
+          </div>
+        </div>
+        <div class="app-musiclist">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Track</th>
+              </tr>
+            </thead>
+            <tbody style="">
+              <tr ng-repeat="item in list | filter:query" ng-class="{nowplaying:player_index==$index}" ng-click="index()" ng-dblclick="index_and_play()" ng-controller="MediaCtrl">
+                <td>{{item.title}}</td>
+                <td>{{item.artist}}</td>
+                <td>{{item.album}}</td>
+                <td>{{item.track}}</td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
+      </div>
+    </div>
+  </body>
+</html>
