@@ -21,11 +21,8 @@ body {
   margin: 0;
   font-family: Helvetica;
 }
-body {
-  overflow: auto;
-}
 .app-container {
-  height: 100%;
+  height: -webkit-calc(100% - 60px);
   display: -webkit-flex;
   -webkit-flex-flow: column nowrap;
   -webkit-align-items: stretch;
@@ -63,6 +60,8 @@ body {
   display: -webkit-flex;
   -webkit-align-items: center;
   -webkit-flex-flow: column nowrap;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .app-container .app-control div.center div.progress {
   -webkit-flex-direction: row;
@@ -79,6 +78,7 @@ body {
   -webkit-flex-flow: row nowrap;
   -webkit-align-items: stretch;
   -webkit-justify-content: flex-start;
+  height: 100%;
 }
 .app-container .app-main .app-sidebar {
   padding: 10px;

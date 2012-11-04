@@ -62,7 +62,7 @@ console.log(entry);
           if (tags.picture) {
 console.log(tags.picture);
             image = 'data:'+tags.picture.format+';base64,'+Base64.encodeBytes(tags.picture.data);
-          };
+          }
           var info = {
             path:     url,
             artist:   tags.artist || '',
