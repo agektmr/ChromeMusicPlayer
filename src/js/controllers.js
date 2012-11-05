@@ -85,7 +85,7 @@ app.controller('MediaControlCtrl', function($scope, control) {
   $scope.volume_change = function() {
     $scope.player.volume_change();
   };
-  $scope.list = [];
+  $scope.list = ChromeMusicPlayer.getMediaList();
   $scope.reload = function() {
     $scope.list = [];
     $scope.loading = true;

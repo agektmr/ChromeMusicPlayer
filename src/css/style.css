@@ -22,7 +22,7 @@ body {
   font-family: Helvetica;
 }
 .app-container {
-  height: -webkit-calc(100% - 60px);
+  height: 100%;
   display: -webkit-flex;
   -webkit-flex-flow: column nowrap;
   -webkit-align-items: stretch;
@@ -78,7 +78,7 @@ body {
   -webkit-flex-flow: row nowrap;
   -webkit-align-items: stretch;
   -webkit-justify-content: flex-start;
-  height: 100%;
+  height: -webkit-calc(100% - 105px);
 }
 .app-container .app-main .app-sidebar {
   padding: 10px;
@@ -92,6 +92,7 @@ body {
 .app-container .app-main .app-musiclist {
   overflow-y: scroll;
   -webkit-flex: 1 1 auto;
+  height: 100%;
 }
 .app-container .app-main .app-musiclist table {
   width: 100%;
