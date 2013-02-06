@@ -15,6 +15,7 @@
     "background": {
       "scripts": [
         "js/filer.js",
+        "js/database.js",
         "js/ChromeMusicPlayer.js",
         "js/background.js",
         "js/id3/stringutils.js",

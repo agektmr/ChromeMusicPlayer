@@ -22,6 +22,7 @@ var ChromeMusicPlayer = (function() {
   var filer = new Filer();
   filer.init();
   var ChromeMusicPlayer = function() {
+    this.db = new musicDb();
     chrome.mediaGalleries.getMediaFileSystems({
       interactive: 'if_needed'
     }, function(localfilesystem) {
@@ -33,10 +34,13 @@ var ChromeMusicPlayer = (function() {
     });
   };
   ChromeMusicPlayer.prototype = {
-    init: function(callback) {
+    loadLocalMusic: function(callback) {
       pathList = [];
       mediaList = [];
-      this.traverse(mediaRoot, callback);
+      var that = this;
+      this.traverse(mediaRoot, function() {
+        that.db.add(mediaList, callback);
+      });
     },
     traverse: function(root, callback) {
       filer.ls(root, (function(entries) {
@@ -54,10 +58,10 @@ var ChromeMusicPlayer = (function() {
     },
     parseID3: function(entry, callback) {
       entry.file(function(file) {
-        var url = entry.fullPath;
+        var originalPath = entry.fullPath;
         if (file.type !== 'audio/mp3') {
           var info = {
-            path:     url,
+            path:     originalPath,
             artist:   '',
             title:    file.name,
             album:    '',
@@ -73,14 +77,17 @@ var ChromeMusicPlayer = (function() {
           mediaList.push(info);
           return;
         }
-        ID3.loadTags(url, function() {
-          var tags = ID3.getAllTags(url);
+        ID3.loadTags(originalPath, function() {
+          var tags = ID3.getAllTags(originalPath);
           var image = '';
           if (tags.picture) {
             image = 'data:'+tags.picture.format+';base64,'+Base64.encodeBytes(tags.picture.data);
           }
+          // TODO: consider ESCAPE
+          var path = '/'+[tags.artist || 'Unkown', tags.album || 'Unknown', file.name].join('/');
           var info = {
-            path:     url,
+            name:     file.name,
+            path:     path,
             artist:   tags.artist || '',
             title:    tags.title || '',
             album:    tags.album || '',
@@ -101,15 +108,19 @@ var ChromeMusicPlayer = (function() {
         });
       });
     },
-    getMediaList: function() {
-      var list = [];
-      mediaList.forEach(function(item) {
-        // intensionally omit wav files
-        if (!item.path.match(/.wav$/)) {
-          list.push(item);
-        }
-      });
-      return list;
+    getMedia: function(path, callback) {
+      filer.open(path, callback);
+    },
+    getMediaList: function(callback) {
+      // var list = [];
+      this.db.getAll(callback);
+      // mediaList.forEach(function(item) {
+      //   // intensionally omit wav files
+      //   if (!item.path.match(/.wav$/)) {
+      //     list.push(item);
+      //   }
+      // });
+      // return list;
     }
   };
   return new ChromeMusicPlayer();

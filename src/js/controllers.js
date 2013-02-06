@@ -18,8 +18,8 @@ Author: Eiji Kitamura (agektmr@gmail.com)
 var audioPlayer = function(entry, endCallback) {
   this.duration = 0;
   this.info = entry;
-  this.song_blob_url = window.webkitURL.createObjectURL(entry.file);
-  this.player = new Audio(this.song_blob_url);
+  var path = 'filesystem:chrome-extension://'+chrome.runtime.id+'/temporary/'+encodeURIComponent(entry.name);
+  this.player = new Audio(path);
   this.player.addEventListener('durationchange', (function() {
     this.duration = this.player.duration * 1000;
   }).bind(this));
@@ -85,16 +85,21 @@ app.controller('MediaControlCtrl', function($scope, control) {
   $scope.volume_change = function() {
     $scope.player.volume_change();
   };
-  $scope.list = ChromeMusicPlayer.getMediaList();
-  $scope.reload = function() {
+  $scope.load_local_music = function() {
     $scope.list = [];
     $scope.loading = true;
-    ChromeMusicPlayer.init(function() {
+    ChromeMusicPlayer.loadLocalMusic(function() {
       $scope.loading = false;
-      $scope.list = ChromeMusicPlayer.getMediaList();
-      $scope.$apply();
+      ChromeMusicPlayer.getMediaList(function(list) {
+        $scope.list = list;
+        $scope.$apply();
+      });
     });
   };
+  ChromeMusicPlayer.getMediaList(function(list) {
+    $scope.list = list;
+    $scope.$apply();
+  });
 });
 
 app.controller('MediaCtrl', function($scope, control) {
