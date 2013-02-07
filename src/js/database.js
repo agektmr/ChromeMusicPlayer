@@ -52,7 +52,9 @@ var musicDb = (function() {
       //   lyrics:   lyrics
       //   artwork:  artwork image in DataURI format
       // };
-      db.deleteObjectStore('music');
+      if (db.objectStoreNames.contains('music')) {
+        db.deleteObjectStore('music');
+      }
       var music = db.createObjectStore('music', {keyPath: 'path'});
       music.createIndex('name',   'name',   {unique: false});
       music.createIndex('path',   'path',   {unique: false});

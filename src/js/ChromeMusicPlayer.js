@@ -108,19 +108,11 @@ var ChromeMusicPlayer = (function() {
         });
       });
     },
-    getMedia: function(path, callback) {
-      filer.open(path, callback);
+    getMediaPath: function(name) {
+      return 'filesystem:chrome-extension://'+chrome.runtime.id+'/temporary/'+encodeURIComponent(name);
     },
     getMediaList: function(callback) {
-      // var list = [];
       this.db.getAll(callback);
-      // mediaList.forEach(function(item) {
-      //   // intensionally omit wav files
-      //   if (!item.path.match(/.wav$/)) {
-      //     list.push(item);
-      //   }
-      // });
-      // return list;
     }
   };
   return new ChromeMusicPlayer();

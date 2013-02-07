@@ -18,7 +18,7 @@ Author: Eiji Kitamura (agektmr@gmail.com)
 var audioPlayer = function(entry, endCallback) {
   this.duration = 0;
   this.info = entry;
-  var path = 'filesystem:chrome-extension://'+chrome.runtime.id+'/temporary/'+encodeURIComponent(entry.name);
+  var path = ChromeMusicPlayer.getMediaPath(entry.name);
   this.player = new Audio(path);
   this.player.addEventListener('durationchange', (function() {
     this.duration = this.player.duration * 1000;
