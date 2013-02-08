@@ -26,9 +26,10 @@ var ChromeMusicPlayer = (function() {
     chrome.mediaGalleries.getMediaFileSystems({
       interactive: 'if_needed'
     }, function(localfilesystem) {
-      localfilesystem.forEach(function(media) {
-        if (media.name.match(/Music/)) {
-          mediaRoot = media.root;
+      localfilesystem.forEach(function(fs) {
+        var metadata = chrome.mediaGalleries.getMediaFileSystemMetadata(fs);
+        if (metadata.name === 'Music') {
+          mediaRoot = fs.root;
         }
       });
     });
@@ -42,11 +43,19 @@ var ChromeMusicPlayer = (function() {
         that.db.add(mediaList, callback);
       });
     },
+    dismissAllMusic: function(callback) {
+      pathList = [];
+      mediaList = [];
+      this.db.removeAll(callback);
+    },
     traverse: function(root, callback) {
       filer.ls(root, (function(entries) {
-// console.log(entries);
+        if (entries.length === 0) {
+          console.info('no media files found');
+          callback();
+        }
         entries.forEach((function(entry) {
-// console.log(entry);
+console.log(entry);
           if (entry.isDirectory) {
             this.traverse(entry, callback);
           } else {
@@ -87,7 +96,8 @@ var ChromeMusicPlayer = (function() {
           var path = '/'+[tags.artist || 'Unkown', tags.album || 'Unknown', file.name].join('/');
           var info = {
             name:     file.name,
-            path:     path,
+            // path:     path,
+            path:     originalPath,
             artist:   tags.artist || '',
             title:    tags.title || '',
             album:    tags.album || '',
@@ -108,8 +118,14 @@ var ChromeMusicPlayer = (function() {
         });
       });
     },
-    getMediaPath: function(name) {
-      return 'filesystem:chrome-extension://'+chrome.runtime.id+'/temporary/'+encodeURIComponent(name);
+    getMediaPath: function(entry) {
+      // TODO: Trying to see if mediaFiles can be reachable from fs, running out of time
+      // filer.open(entry.path, function(e) {
+      //   console.log(e);
+      // }, function(e) {
+      //   console.error(e);
+      // });
+      return 'filesystem:chrome-extension://'+chrome.runtime.id+'/temporary/'+encodeURIComponent(entry.name);
     },
     getMediaList: function(callback) {
       this.db.getAll(callback);

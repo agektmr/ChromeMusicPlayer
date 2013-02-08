@@ -17,7 +17,7 @@ Author: Eiji Kitamura (agektmr@gmail.com)
 */
 var musicDb = (function() {
   var db,
-      version = 5,
+      version = 6,
       filer = new Filer();
   filer.init();
 
@@ -93,7 +93,7 @@ var musicDb = (function() {
         for (var key in opt_query_obj) {
           var index = objectStore.index(key);
           // TODO
-          index.openCursor(opt_query_obj[key])
+          index.openCursor(opt_query_obj[key]);
         }
       }
 
@@ -128,14 +128,8 @@ var musicDb = (function() {
               filer.write(entry.name, {data:file, type:file.type},
               function(fileEntry, fileWriter) {
                 console.log(fileEntry, fileWriter);
-              },
-              function(e) {
-                console.error(e);
               });
             });
-            // }, function(e) {
-            //   console.error(e);
-            // });
           };
         });
       } else {
@@ -143,13 +137,30 @@ var musicDb = (function() {
         objectStore.put(entries);
       }
     },
-    remove: function() {
+    removeAll: function(callback) {
       var transaction = db.transaction(['music'], 'readwrite');
       transaction.oncomplete = function() {
-        indexedDB.deleteDatabase('ChromeMusicApp', version);
-        console.info('deleted database');
+        console.info('deleted all music!');
+        if (typeof callback === 'function') callback();
       };
-      transaction.deleteObjectStore('music');
+      var music = transaction.objectStore('music');
+      var req = music.openCursor();
+      req.onsuccess = function(e) {
+        var cursor = e.target.result;
+        if (cursor) {
+          var entry = cursor.value;
+          filer.cd('/', function(dir) {
+            filer.rm(entry.name, function() {
+              console.log(entry.title, 'file deleted');
+            });
+          });
+          var req2 = music.delete(cursor.key);
+          req2.onsuccess = function() {
+            console.log(entry.title, 'index deleted');
+          };
+          cursor.continue();
+        }
+      };
     }
   };
 
