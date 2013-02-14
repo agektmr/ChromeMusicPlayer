@@ -94,6 +94,7 @@ app.controller('MediaControlCtrl', function($scope, control) {
     $scope.player.volume_change();
   };
   $scope.load_local_music = function() {
+    $scope.list = [];
     $scope.loading = true;
     ChromeMusicPlayer.loadLocalMusic(function() {
       $scope.loading = false;
@@ -102,6 +103,7 @@ app.controller('MediaControlCtrl', function($scope, control) {
   };
   $scope.dismiss_music = function() {
     ChromeMusicPlayer.dismissAllMusic(function(list) {
+      $scope.loading = false;
       reload($scope);
     });
   };
@@ -109,6 +111,7 @@ app.controller('MediaControlCtrl', function($scope, control) {
 });
 
 app.controller('MediaCtrl', function($scope, control) {
+  $scope.control = control;
   $scope.index = function() {
     control.cursor = $scope.$index;
   };

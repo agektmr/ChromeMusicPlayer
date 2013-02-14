@@ -46,6 +46,7 @@
           <table class="table">
             <thead>
               <tr>
+                <th>&nbsp;</th>
                 <th>Title</th>
                 <th>Artist</th>
                 <th>Album</th>
@@ -53,7 +54,8 @@
               </tr>
             </thead>
             <tbody style="">
-              <tr ng-repeat="item in list | filter:query" ng-class="{nowplaying:player_index==$index}" ng-click="index()" ng-dblclick="index_and_play()" ng-controller="MediaCtrl">
+              <tr ng-repeat="item in list | filter:query" ng-click="index()" ng-dblclick="index_and_play()" ng-controller="MediaCtrl">
+                <td ng-class="{playing:player_index==$index}"></td>
                 <td>{{item.title}}</td>
                 <td>{{item.artist}}</td>
                 <td>{{item.album}}</td>

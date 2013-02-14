@@ -54,6 +54,7 @@ body {
   padding: 10px 20px;
   background-color: #ebefdf;
   box-shadow: -1px 1px 7px -1px inset;
+  font-size: 0.9em;
 }
 .app-container .app-control div.center div {
   -webkit-flex: 1 1 auto;
@@ -78,7 +79,7 @@ body {
   -webkit-flex-flow: row nowrap;
   -webkit-align-items: stretch;
   -webkit-justify-content: flex-start;
-  height: -webkit-calc(100% - 105px);
+  height: -webkit-calc(-5%);
 }
 .app-container .app-main .app-sidebar {
   padding: 10px;
@@ -105,6 +106,6 @@ body {
 .app-container .app-main .app-musiclist table tr:hover {
   background-color: #ccf;
 }
-.app-container .app-main .app-musiclist table .selected {
-  background: #aaf;
+.app-container .app-main .app-musiclist table .playing {
+  background: #999;
 }
