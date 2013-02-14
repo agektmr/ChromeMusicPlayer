@@ -1,0 +1,3 @@
+[submodule "src/js/id3"]
+	path = src/js/id3
+	url = git@github.com:agektmr/JavaScript-ID3-Reader.git
