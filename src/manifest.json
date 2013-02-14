@@ -18,15 +18,15 @@
         "js/database.js",
         "js/ChromeMusicPlayer.js",
         "js/background.js",
-        "js/id3/stringutils.js",
-        "js/id3/bufferedbinaryajax.js",
-        "js/id3/filereader.js",
-        "js/id3/base64.js",
-        "js/id3/id3.js",
-        "js/id3/id3v1.js",
-        "js/id3/id3v2.js",
-        "js/id3/id3v2frames.js",
-        "js/id3/id4.js"
+        "js/id3/src/stringutils.js",
+        "js/id3/src/bufferedbinaryajax.js",
+        "js/id3/src/filereader.js",
+        "js/id3/src/base64.js",
+        "js/id3/src/id3.js",
+        "js/id3/src/id3v1.js",
+        "js/id3/src/id3v2.js",
+        "js/id3/src/id3v2frames.js",
+        "js/id3/src/id4.js"
       ]
     }
   },
