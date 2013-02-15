@@ -18,57 +18,95 @@ Author: Eiji Kitamura (agektmr@gmail.com)
 var ChromeMusicPlayer = (function() {
   var mediaRoot = null;
   var mediaList = [];
-  var pathList = []; // used to count number of songs so that callback function can be invoked after id3 load
   var filer = new Filer();
   filer.init();
   var ChromeMusicPlayer = function() {
     this.db = new musicDb();
-    chrome.mediaGalleries.getMediaFileSystems({
-      interactive: 'if_needed'
-    }, function(localfilesystem) {
-      localfilesystem.forEach(function(fs) {
-        var metadata = chrome.mediaGalleries.getMediaFileSystemMetadata(fs);
-        if (metadata.name === 'Music') {
-          mediaRoot = fs.root;
-        }
-      });
-    });
+    this.fileList = [];
   };
   ChromeMusicPlayer.prototype = {
     loadLocalMusic: function(callback) {
-      pathList = [];
-      mediaList = [];
       var that = this;
-      this.traverse(mediaRoot, function() {
-        that.db.add(mediaList, callback);
+      chrome.mediaGalleries.getMediaFileSystems({
+        interactive: 'if_needed'
+      }, function(localfilesystem) {
+        localfilesystem.forEach(function(fs) {
+          var metadata = chrome.mediaGalleries.getMediaFileSystemMetadata(fs);
+          if (metadata.name === 'Music') {
+            that.fileList = [];
+            that.createListFromFS(fs.root, function() {
+              that.addMusics(that.fileList, function() {
+console.log('music addition complete');
+              });
+            });
+          }
+        });
       });
     },
+    addMusics: function(entries, callback) {
+      var entry = entries.shift();
+      if (entry) {
+console.log('adding music');
+        this.parseMusicFile(entry, (function(info) {
+console.log('parsed: ', info);
+          this.db.add(info);
+console.log('entries left: ', entries.length);
+          this.addMusics(entries, callback);
+        }).bind(this));
+      } else {
+        callback();
+      }
+    },
     dismissAllMusic: function(callback) {
-      pathList = [];
       mediaList = [];
       this.db.removeAll(callback);
     },
-    traverse: function(root, callback) {
+    createListFromFS: function(root, callback) {
       filer.ls(root, (function(entries) {
-        if (entries.length === 0) {
-          console.info('no media files found');
-          callback();
-        }
+        if (entries.length === 0) callback();
         entries.forEach((function(entry) {
-console.log(entry);
           if (entry.isDirectory) {
-            this.traverse(entry, callback);
+            this.createListFromFS(entry, callback);
           } else {
-            pathList.push(entry.name);
-            this.parseID3(entry, callback);
+            this.fileList.push(entry);
           }
         }).bind(this));
+        callback();
       }).bind(this));
     },
-    parseID3: function(entry, callback) {
+    parseMusicFile: function(entry, callback) {
       entry.file(function(file) {
         var originalPath = entry.fullPath;
-        if (file.type !== 'audio/mp3') {
+        if (file.type == 'audio/mp3') {
+          ID3.loadTags(originalPath, function() {
+            var tags = ID3.getAllTags(originalPath);
+            var image = '';
+            if (tags.picture) {
+              image = 'data:'+tags.picture.format+';base64,'+Base64.encodeBytes(tags.picture.data);
+            }
+            // TODO: consider ESCAPE
+            var path = '/'+[tags.artist || 'Unkown', tags.album || 'Unknown', file.name].join('/');
+            var info = {
+              name:     file.name,
+              // path:     path,
+              path:     originalPath,
+              artist:   tags.artist || '',
+              title:    tags.title || '',
+              album:    tags.album || '',
+              year:     tags.year || '',
+              comment:  tags.comment || '',
+              genre:    tags.genre || '',
+              track:    tags.track || '',
+              lyrics:   tags.lyrics || '',
+              artwork:  image,
+              file:     file
+            };
+            callback(info);
+          }, {
+            tags: ["artist", "title", "album", "year", "comment", "track", "genre", "lyrics", "picture"],
+            dataReader: FileAPIReader(file)
+          });
+        } else {
           var info = {
             path:     originalPath,
             artist:   '',
@@ -82,40 +120,8 @@ console.log(entry);
             artwork:  '',
             file:     file
           };
-          console.log(info);
-          mediaList.push(info);
-          return;
+          callback(info);
         }
-        ID3.loadTags(originalPath, function() {
-          var tags = ID3.getAllTags(originalPath);
-          var image = '';
-          if (tags.picture) {
-            image = 'data:'+tags.picture.format+';base64,'+Base64.encodeBytes(tags.picture.data);
-          }
-          // TODO: consider ESCAPE
-          var path = '/'+[tags.artist || 'Unkown', tags.album || 'Unknown', file.name].join('/');
-          var info = {
-            name:     file.name,
-            // path:     path,
-            path:     originalPath,
-            artist:   tags.artist || '',
-            title:    tags.title || '',
-            album:    tags.album || '',
-            year:     tags.year || '',
-            comment:  tags.comment || '',
-            genre:    tags.genre || '',
-            track:    tags.track || '',
-            lyrics:   tags.lyrics || '',
-            artwork:  image,
-            file:     file
-          };
-          console.log(info);
-          mediaList.push(info);
-          if (pathList.length == mediaList.length) callback();
-        }, {
-          tags: ["artist", "title", "album", "year", "comment", "track", "genre", "lyrics", "picture"],
-          dataReader: FileAPIReader(file)
-        });
       });
     },
     getMediaPath: function(entry) {

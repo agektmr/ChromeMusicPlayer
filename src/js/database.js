@@ -17,9 +17,28 @@ Author: Eiji Kitamura (agektmr@gmail.com)
 */
 var musicDb = (function() {
   var db,
+      fs,
       version = 6,
       filer = new Filer();
+
   filer.init();
+  chrome.syncFileSystem.requestFileSystem(function(_fs) {
+    fs = _fs;
+    filer.ls(fs.root, function(entries) {
+      console.log(entries);
+    });
+  });
+
+  var persistFile = function(dir, name, file) {
+    // filer.mkdir(dir, true, function(dirEntry) {
+    filer.cd(fs.root, function(dir) {
+      filer.write(name, {data:file, type:file.type},
+      function(fileEntry, fileWriter) {
+console.log(name, 'added to FS');
+        console.log(fileEntry, fileWriter);
+      });
+    });
+  };
 
   var musicDb = function(callback) {
     var req = indexedDB.open('ChromeMusicApp', version);
@@ -99,6 +118,19 @@ var musicDb = (function() {
 
     },
     add: function(entries, callback, error) {
+      var add = function(entry) {
+        var dir = '/'+(entry.artist || 'Unknown')+'/'+(entry.album || 'Unknown');
+        var file = entry.file || null;
+        if (file) {
+          delete entry.file;
+        }
+        var req = objectStore.put(entry);
+        req.onsuccess = function(e) {
+console.log(entry, 'added to iDB');
+          persistFile(dir, entry.name, file);
+        };
+      };
+
       var transaction = db.transaction(['music'], 'readwrite');
       transaction.oncomplete = function() {
         console.log('complete');
@@ -114,27 +146,9 @@ var musicDb = (function() {
       };
       var objectStore = transaction.objectStore('music');
       if (entries.constructor.name === 'Array') {
-        // iterrate when array
-        entries.forEach(function(entry) {
-          var dir = '/'+(entry.artist || 'Unknown')+'/'+(entry.album || 'Unknown');
-          var file = entry.file || null;
-          if (file) {
-            delete entry.file;
-          }
-          var req = objectStore.put(entry);
-          req.onsuccess = function(e) {
-            // filer.mkdir(dir, true, function(dirEntry) {
-            filer.cd('/', function(dir) {
-              filer.write(entry.name, {data:file, type:file.type},
-              function(fileEntry, fileWriter) {
-                console.log(fileEntry, fileWriter);
-              });
-            });
-          };
-        });
+        entries.forEach(add);
       } else {
-        // simply add object when object
-        objectStore.put(entries);
+        add(entries);
       }
     },
     removeAll: function(callback) {

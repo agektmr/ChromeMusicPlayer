@@ -35,6 +35,7 @@
       </div>
       <div class="app-main">
         <div class="app-sidebar">
+          <input type="button" class="btn" value="Reload" placeholder="" ng-click="reload()">
           <input type="button" class="btn" value="Load music" placeholder="" ng-click="load_local_music()" ng-disabled="loading" ng-init="loading=false">
           <input type="button" class="btn" value="Dismiss music" placeholder="" ng-click="dismiss_music()">
           <p style="color:#aaa; font-size: 0.75em;">it takes a while to load all your music depending on how many audio files you have on your local disk.</p>

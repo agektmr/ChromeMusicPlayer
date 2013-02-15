@@ -9,7 +9,8 @@
         "read",
         "allAutoDetected"
       ]
-    }
+    },
+    "syncFileSystem"
   ],
   "app": {
     "background": {

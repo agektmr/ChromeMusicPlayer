@@ -46,6 +46,7 @@ app.controller('MediaControlCtrl', function($scope, control) {
   $scope.player = null;
   $scope.play_stop_label = 'Play';
   $scope.query = '';
+  $scope.list = [];
 
   var reload = function($scope) {
     ChromeMusicPlayer.getMediaList(function(list) {
@@ -92,6 +93,9 @@ app.controller('MediaControlCtrl', function($scope, control) {
   };
   $scope.volume_change = function() {
     $scope.player.volume_change();
+  };
+  $scope.reload = function() {
+    reload($scope);
   };
   $scope.load_local_music = function() {
     $scope.list = [];
