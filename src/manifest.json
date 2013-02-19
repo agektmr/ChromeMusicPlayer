@@ -10,14 +10,16 @@
         "allAutoDetected"
       ]
     },
-    "syncFileSystem"
+    "syncFileSystem",
+    "notifications"
   ],
   "app": {
     "background": {
       "scripts": [
         "js/filer.js",
         "js/database.js",
-        "js/ChromeMusicPlayer.js",
+        "js/MusicLoader.js",
+        "js/audioplayer.js",
         "js/background.js",
         "js/id3/src/stringutils.js",
         "js/id3/src/bufferedbinaryajax.js",

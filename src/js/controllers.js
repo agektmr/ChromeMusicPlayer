@@ -15,81 +15,50 @@ limitations under the License.
 
 Author: Eiji Kitamura (agektmr@gmail.com)
 */
-var audioPlayer = function(entry, endCallback) {
-  this.duration = 0;
-  this.info = entry;
-  var path = ChromeMusicPlayer.getMediaPath(entry);
-  this.player = new Audio(path);
-  this.player.addEventListener('durationchange', (function() {
-    this.duration = this.player.duration * 1000;
-  }).bind(this));
-  if (typeof endCallback === 'function') {
-    this.player.addEventListener('ended', endCallback);
-  }
-  this.timer = null;
-};
-audioPlayer.prototype = {
-  play: function() {
-    this.player.play();
-  },
-  pause: function() {
-    this.player.pause();
-    clearInterval(this.player.timer);
-  }
-};
-
 app.controller('MediaControlCtrl', function($scope, control) {
   $scope.player_index = -1;
-  $scope.currentTime = 0;
-  $scope.progress = 0;
   $scope.control = control;
-  $scope.player = null;
-  $scope.play_stop_label = 'Play';
+  $scope.status = PlayListManager.status ? 'Pause' : 'Play';
   $scope.query = '';
+  $scope.volume = 1.0;
   $scope.list = [];
 
+  $scope.info = {
+    title:    '',
+    artist:   '',
+    album:    '',
+    artwork:  '',
+    current:  0,
+    duration: 0,
+    progress: 0
+  };
+
   var reload = function($scope) {
-    ChromeMusicPlayer.getMediaList(function(list) {
-      $scope.list = list;
+    MusicLoader.getAllMusics(function(list) {
+      PlayListManager.setPlayList(list);
+      $scope.list = PlayListManager.list;
       $scope.$apply();
     });
   };
 
-  $scope.stop = function() {
-    if ($scope.player) $scope.player.pause();
-    $scope.play_stop_label = 'Play';
-  };
   $scope.play = function() {
-    if ($scope.play_stop_label === 'Stop') {
-      $scope.stop();
-    } else {
-      if ($scope.player_index !== $scope.control.cursor) {
-        delete $scope.player;
-        $scope.player = new audioPlayer($scope.list[$scope.control.cursor], $scope.stop);
-  console.log($scope.player);
-        $scope.play_stop_label = 'Stop';
-        $scope.player_index = $scope.control.cursor;
-        $scope.player.play();
-        $scope.player.timer = setInterval(function() {
-          $scope.currentTime = $scope.player.player.currentTime * 1000;
-          $scope.progress = ~~($scope.currentTime / $scope.player.duration * 100);
-          $scope.$apply();
-        }, 1000);
-      } else if ($scope.player) {
-        $scope.play_stop_label = 'Stop';
-        $scope.player.play();
-      }
-    }
+    PlayListManager.playStop($scope.control.cursor);
+    $scope.player_index = PlayListManager.index;
+    $scope.status = PlayListManager.status ? 'Pause' : 'Play';
   };
   $scope.backward = function() {
     $scope.control.cursor = $scope.player_index >= 0 ? ($scope.player_index-1) : 0;
-    $scope.stop();
-    $scope.play();
+    if (PlayListManager.status === PlayListManager.PLAYING) {
+      PlayListManager.stop();
+      $scope.play();
+    }
   };
   $scope.forward = function() {
     $scope.control.cursor = $scope.player_index < $scope.list.length ? ($scope.player_index+1) : $scope.list.length;
-    $scope.stop();
-    $scope.play();
+    if (PlayListManager.status === PlayListManager.PLAYING) {
+      PlayListManager.stop();
+      $scope.play();
+    }
   };
   $scope.volume_change = function() {
     $scope.player.volume_change();
@@ -100,18 +69,31 @@ app.controller('MediaControlCtrl', function($scope, control) {
   $scope.load_local_music = function() {
     $scope.list = [];
     $scope.loading = true;
-    ChromeMusicPlayer.loadLocalMusic(function() {
+    MusicLoader.oncomplete = function() {
       $scope.loading = false;
       reload($scope);
-    });
+    };
+    MusicLoader.loadLocalMusics();
   };
   $scope.dismiss_music = function() {
-    ChromeMusicPlayer.dismissAllMusic(function(list) {
+    MusicLoader.dismissAllMusics(function(list) {
       $scope.loading = false;
       reload($scope);
     });
   };
+  $scope.update = function(info) {
+    $scope.info = info;
+    delete info; // TODO: I don't like this
+    $scope.reload($scope);
+  };
+  PlayListManager.onprogress = $scope.update;
+  MusicLoader.onprogress = $scope.update;
+  MusicLoader.onerror = function() {
+    $scope.title = 'Error loading: "'+info.title+'"';
+    $scope.reload($scope);
+  };
   reload($scope);
+
 });
 
 app.controller('MediaCtrl', function($scope, control) {
@@ -121,7 +103,7 @@ app.controller('MediaCtrl', function($scope, control) {
   };
   $scope.index_and_play = function() {
     control.cursor = $scope.$index;
-    $scope.stop();
+    PlayListManager.stop();
     $scope.play();
   };
 });

@@ -10,37 +10,38 @@
     <script src="js/angular.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/controllers.js"></script>
+    <script src="js/audioplayer.js"></script>
   </head>
   <body>
     <div class="app-container" ng-controller="MediaControlCtrl">
       <div class="app-control">
         <div class="left">
           <button class="btn" ng-click="backward()">&lt;&lt;</button>
-          <button class="btn" ng-click="play()">{{play_stop_label}}</button>
+          <button class="btn" ng-click="play()">{{status}}</button>
           <button class="btn" ng-click="forward()">&gt;&gt;</button>
-          <input type="range" min="0" step="0.01" max="1" value="1" style="width:100px" ng-model="player.player.volume">
+          <input type="range" min="0" step="0.01" max="1" value="1" style="width:100px" ng-model="volume">
         </div>
         <div class="center">
-          <div>{{player.info.title}}</div>
-          <div>{{player.info.artist}} - {{player.info.album}}</div>
+          <div>{{info.title}}</div>
+          <div>{{info.artist}} - {{info.album}}</div>
           <div class="progress">
-            <span>{{currentTime|date:'mm:ss'}}</span>&nbsp;
-            <progress max="100" value="{{progress}}"></progress>&nbsp;
-            <span>{{player.duration|date:'mm:ss'}}</span>
+            <span>{{info.current|date:'mm:ss'}}</span>&nbsp;
+            <progress max="100" value="{{info.progress}}"></progress>&nbsp;
+            <span>{{info.duration|date:'mm:ss'}}</span>
           </div>
         </div>
         <div class="right">
-          <input type="search" ng-model="query" value="" placeholder="Search Music">
+          <input type="search" ng-model="query" placeholder="Search Music">
         </div>
       </div>
       <div class="app-main">
         <div class="app-sidebar">
-          <input type="button" class="btn" value="Reload" placeholder="" ng-click="reload()">
-          <input type="button" class="btn" value="Load music" placeholder="" ng-click="load_local_music()" ng-disabled="loading" ng-init="loading=false">
-          <input type="button" class="btn" value="Dismiss music" placeholder="" ng-click="dismiss_music()">
+          <input type="button" class="btn" value="Reload" placeholder="" ng-click="reload()"><br/>
+          <input type="button" class="btn" value="Load music" placeholder="" ng-click="load_local_music()" ng-disabled="loading" ng-init="loading=false"><br/>
+          <input type="button" class="btn" value="Dismiss music" placeholder="" ng-click="dismiss_music()"><br/>
           <p style="color:#aaa; font-size: 0.75em;">it takes a while to load all your music depending on how many audio files you have on your local disk.</p>
           <div class="artwork">
-            <img src="{{player.info.artwork}}" alt="">
+            <img src="{{info.artwork}}" alt="">
           </div>
         </div>
         <div class="app-musiclist">

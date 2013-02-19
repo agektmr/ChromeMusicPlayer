@@ -79,7 +79,7 @@ body {
   -webkit-flex-flow: row nowrap;
   -webkit-align-items: stretch;
   -webkit-justify-content: flex-start;
-  height: -webkit-calc(-5%);
+  height: -webkit-calc(100% - 95px);
 }
 .app-container .app-main .app-sidebar {
   padding: 10px;

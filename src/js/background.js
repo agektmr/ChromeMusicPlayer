@@ -23,6 +23,6 @@ chrome.app.runtime.onLaunched.addListener(function() {
     minHeight: 400,
     singleton: true
   }, function(win) {
-    win.contentWindow.ChromeMusicPlayer = ChromeMusicPlayer;
+    win.contentWindow.MusicLoader = MusicLoader;
   });
 });
