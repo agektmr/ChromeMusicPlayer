@@ -21,7 +21,8 @@ chrome.app.runtime.onLaunched.addListener(function() {
     minWidth: 770,
     height: 500,
     minHeight: 400,
-    singleton: true
+    singleton: true,
+    frame: 'none'
   }, function(win) {
     win.contentWindow.MusicLoader = MusicLoader;
   });
