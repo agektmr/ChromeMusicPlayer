@@ -70,19 +70,20 @@ app.controller('MediaControlCtrl', function($scope, control) {
   };
   $scope.load_local_music = function() {
     $scope.list = [];
-    $scope.loading = true;
     MusicLoader.oncomplete = function() {
-      $scope.loading = false;
       reload($scope);
     };
     MusicLoader.loadLocalMusics();
   };
-  $scope.dismiss_music = function() {
-    MusicLoader.dismissAllMusics(function(list) {
-      $scope.loading = false;
-      reload($scope);
-    });
+  $scope.load_music = function(e) {
+    var item = e.dataTransfer.items[0];
+    if (item) {
+      var fileEntry = item.webkitGetAsEntry();
+      MusicLoader.addMusics(fileEntry);
+    }
+    e.preventDefault();
   };
+  $scope.dismiss_music = MusicLoader.dismissAllMusics;
   $scope.update = function(info) {
     $scope.info = info;
     delete info; // TODO: I don't like this
@@ -91,6 +92,11 @@ app.controller('MediaControlCtrl', function($scope, control) {
     $scope.reload($scope);
   };
   MusicLoader.onprogress = $scope.update;
+  MusicLoader.oncomplete = function() {
+    $scope.quota = MusicLoader.quota;
+    $scope.usage = MusicLoader.usage;
+    $scope.reload($scope);
+  };
   PlayListManager.onprogress = function(info) {
     $scope.info = info;
     delete info;
@@ -101,6 +107,13 @@ app.controller('MediaControlCtrl', function($scope, control) {
   };
   reload($scope);
 
+  var list = document.querySelector('.app-musiclist');
+  list.ondragenter = function(e) {};
+  list.ondragleave = function(e) {};
+  list.ondragover = function(e) {
+    e.preventDefault();
+  };
+  list.ondrop = $scope.load_music;
 });
 
 app.controller('MediaCtrl', function($scope, control) {

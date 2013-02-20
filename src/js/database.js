@@ -77,8 +77,7 @@ var MusicDB = (function() {
           tags: ["artist", "title", "album", "year", "comment", "track", "genre", "lyrics", "picture"],
           dataReader: FileAPIReader(file)
         });
-      // } else if (file.type.indexOf('audio') === 0) {
-      } else {
+      } else if (file.type.indexOf('audio') === 0) {
         var dir  = '/Unknown/Unknown';
         // var path = dir+'/'+file.name;
         var path = file.name;
@@ -292,10 +291,11 @@ console.log(info.name, 'added to iDB');
       }
     },
     removeAll: function(callback) {
+      var that = this;
       var transaction = db.transaction(['music'], 'readwrite');
       transaction.oncomplete = function() {
         console.info('deleted all music!');
-        if (typeof callback === 'function') callback();
+        if (typeof that.oncomplete === 'function') that.oncomplete();
       };
       var music = transaction.objectStore('music');
       var req = music.openCursor();

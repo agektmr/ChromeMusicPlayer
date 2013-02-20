@@ -105,6 +105,15 @@ console.log('removing music from remote:', fileInfo.fileEntry);
         });
       });
     },
+    addMusics: function(fileEntry) {
+      if (fileEntry.isFile) {
+        // directory add to queue if file
+        db.add(fileEntry);
+      } else {
+        // parse and create list of fileEntries if directory
+        createListFromFS(fileEntry);
+      }
+    },
     getAllMusics: function(callback) {
       db.getAll(callback);
     },

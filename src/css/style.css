@@ -21,6 +21,9 @@ body {
   margin: 0;
   font-family: Helvetica;
 }
+input {
+  -webkit-app-region: no-drag;
+}
 .app-container {
   height: 100%;
   display: -webkit-flex;
@@ -103,6 +106,7 @@ body {
   overflow-y: scroll;
   -webkit-flex: 1 1 auto;
   height: 100%;
+  -webkit-user-drag: element;
 }
 .app-container .app-main .app-musiclist table {
   width: 100%;
