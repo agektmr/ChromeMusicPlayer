@@ -43,7 +43,11 @@ console.log('removing music from remote:', fileInfo.fileEntry);
       var progress = MusicLoader.handling_files - db.getQueueLength();
       info.title = 'Loading "'+info.title+'" ('+progress+'/'+MusicLoader.handling_files+')';
       info.progress = ~~(progress / MusicLoader.handling_files * 100);
-      MusicLoader.onprogress(info);
+      db.updateQuotaAndUsage(function() {
+        MusicLoader.usage = db.usage;
+        MusicLoader.quota = db.quota;
+        MusicLoader.onprogress(info);
+      });
     }
   };
   db.oncomplete = function() {
@@ -79,6 +83,8 @@ console.log('removing music from remote:', fileInfo.fileEntry);
   return {
     RETRIEVE_COMPLETE: 1,
     SAVE_COMPLETE: 2,
+    quota: 0,
+    usage: 0,
     status: 0,
     handling_files: 0,
     onprogress: null,

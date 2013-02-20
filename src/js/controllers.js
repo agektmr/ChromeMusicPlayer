@@ -20,8 +20,10 @@ app.controller('MediaControlCtrl', function($scope, control) {
   $scope.control = control;
   $scope.status = PlayListManager.status ? 'Pause' : 'Play';
   $scope.query = '';
-  $scope.volume = 1.0;
+  $scope.volume = PlayListManager.volume;
   $scope.list = [];
+  $scope.quota = 0;
+  $scope.usage = 0;
 
   $scope.info = {
     title:    '',
@@ -41,8 +43,8 @@ app.controller('MediaControlCtrl', function($scope, control) {
     });
   };
 
-  $scope.play = function() {
-    PlayListManager.playStop($scope.control.cursor);
+  $scope.play = function(index) {
+    PlayListManager.playStop(index);
     $scope.player_index = PlayListManager.index;
     $scope.status = PlayListManager.status ? 'Pause' : 'Play';
   };
@@ -50,18 +52,18 @@ app.controller('MediaControlCtrl', function($scope, control) {
     $scope.control.cursor = $scope.player_index >= 0 ? ($scope.player_index-1) : 0;
     if (PlayListManager.status === PlayListManager.PLAYING) {
       PlayListManager.stop();
-      $scope.play();
+      $scope.play($scope.control.cursor);
     }
   };
   $scope.forward = function() {
     $scope.control.cursor = $scope.player_index < $scope.list.length ? ($scope.player_index+1) : $scope.list.length;
     if (PlayListManager.status === PlayListManager.PLAYING) {
       PlayListManager.stop();
-      $scope.play();
+      $scope.play($scope.control.cursor);
     }
   };
   $scope.volume_change = function() {
-    $scope.player.volume_change();
+    PlayListManager.setVolume($scope.volume);
   };
   $scope.reload = function() {
     reload($scope);
@@ -84,10 +86,15 @@ app.controller('MediaControlCtrl', function($scope, control) {
   $scope.update = function(info) {
     $scope.info = info;
     delete info; // TODO: I don't like this
+    $scope.quota = MusicLoader.quota;
+    $scope.usage = MusicLoader.usage;
     $scope.reload($scope);
   };
-  PlayListManager.onprogress = $scope.update;
   MusicLoader.onprogress = $scope.update;
+  PlayListManager.onprogress = function(info) {
+    $scope.info = info;
+    delete info;
+  };
   MusicLoader.onerror = function() {
     $scope.title = 'Error loading: "'+info.title+'"';
     $scope.reload($scope);
@@ -104,6 +111,6 @@ app.controller('MediaCtrl', function($scope, control) {
   $scope.index_and_play = function() {
     control.cursor = $scope.$index;
     PlayListManager.stop();
-    $scope.play();
+    $scope.play($scope.control.cursor);
   };
 });

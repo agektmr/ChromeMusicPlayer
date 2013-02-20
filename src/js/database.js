@@ -213,6 +213,14 @@ console.log(info.name, 'added to iDB');
     onprogress: null,
     oncomplete: null,
     onerror: null,
+    updateQuotaAndUsage: function(callback) {
+      var that = this;
+      chrome.syncFileSystem.getUsageAndQuota(fs, function(storageInfo) {
+        that.usage = storageInfo.usageBytes;
+        that.quota = storageInfo.quotaBytes;
+        callback();
+      });
+    },
     getAll: function(callback, error) {
       var result = [];
       var transaction = db.transaction(['music'], 'readonly');

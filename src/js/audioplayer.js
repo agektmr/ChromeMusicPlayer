@@ -62,14 +62,13 @@ var PlayListManager = (function() {
       }
     },
     playStop: function(index) {
-      var that = this;
       // Play
       if (this.status === PlayListManager.prototype.PAUSED) {
         if (index !== undefined) {
           delete this.player;
           var entry = this.list[index];
           if (entry) {
-            this.player = new audioPlayer(entry, that.onprogress, that.playNext.bind(that));
+            this.player = new audioPlayer(entry, this.onprogress, this.playNext.bind(this));
             this.index = index;
             this.status = PlayListManager.prototype.PLAYING;
             this.player.play();
@@ -93,6 +92,12 @@ var PlayListManager = (function() {
       var index = this.list.length > (this.index+1) ? this.index+1 : 0;
       this.stop();
       this.playStop(index);
+    },
+    setVolume: function(volume) {
+      this.volume = volume;
+      if (this.player) {
+        this.player.player.volume = this.volume;
+      }
     }
   };
   return new PlayListManager();
