@@ -35,14 +35,6 @@ app.controller('MediaControlCtrl', function($scope, control) {
     progress: 0
   };
 
-  var reload = function($scope) {
-    MusicLoader.getAllMusics(function(list) {
-      PlayListManager.setPlayList(list);
-      $scope.list = PlayListManager.list;
-      $scope.$apply();
-    });
-  };
-
   $scope.play = function(index) {
     PlayListManager.playStop(index);
     $scope.player_index = PlayListManager.index;
@@ -66,12 +58,16 @@ app.controller('MediaControlCtrl', function($scope, control) {
     PlayListManager.setVolume($scope.volume);
   };
   $scope.reload = function() {
-    reload($scope);
+    MusicLoader.getAllMusics(function(list) {
+      PlayListManager.setPlayList(list);
+      $scope.list = PlayListManager.list;
+      $scope.$apply();
+    });
   };
   $scope.load_local_music = function() {
     $scope.list = [];
     MusicLoader.oncomplete = function() {
-      reload($scope);
+      $scope.reload();
     };
     MusicLoader.loadLocalMusics();
   };
@@ -89,23 +85,24 @@ app.controller('MediaControlCtrl', function($scope, control) {
     delete info; // TODO: I don't like this
     $scope.quota = MusicLoader.quota;
     $scope.usage = MusicLoader.usage;
-    $scope.reload($scope);
+    $scope.reload();
   };
   MusicLoader.onprogress = $scope.update;
   MusicLoader.oncomplete = function() {
     $scope.quota = MusicLoader.quota;
     $scope.usage = MusicLoader.usage;
-    $scope.reload($scope);
+    $scope.reload();
   };
   PlayListManager.onprogress = function(info) {
     $scope.info = info;
     delete info;
+    $scope.$apply();
   };
   MusicLoader.onerror = function() {
     $scope.title = 'Error loading: "'+info.title+'"';
-    $scope.reload($scope);
+    $scope.reload();
   };
-  reload($scope);
+  $scope.reload();
 
   var list = document.querySelector('.app-musiclist');
   list.ondragenter = function(e) {};
