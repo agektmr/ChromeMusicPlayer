@@ -20,7 +20,10 @@ To feel the power, go Google Drive > Chrome Syncable FileSystem > [app's extensi
 https://github.com/agektmr/ChromeMusicPlayer
 
 ## Installation:
-* > `git clone git@github.com:agektmr/ChromeMusicPlayer.git`
-* Open `chrome://extensions` and check `Developer mode`
-* Click `Load unpacked extension...` and select `ChromeMusicPlayer/src`
-* Now you will see Chrome Music Player app on your new tab page
+1 > `git clone git@github.com:agektmr/ChromeMusicPlayer.git`
+2 > `cd ChromeMusicPlayer/`
+3 > `git submodule init`
+4 > `git submodule update`
+5 Open `chrome://extensions` and check `Developer mode`
+6 Click `Load unpacked extension...` and select `ChromeMusicPlayer/src`
+7 Now you will see Chrome Music Player app on your new tab page
