@@ -45,6 +45,29 @@ input {
         display: -webkit-flex;
         -webkit-justify-content: flex-start;
         -webkit-align-items: center;
+        .btn {
+          margin: 0 3px;
+          border: 0px;
+          width: 32px;
+          height: 32px;
+          background: url(../img/buttons.png) no-repeat;
+          &.backward {
+            background-position-x: -128px;
+          }
+          &.play {
+            background-position-x: -0px;
+            &.playing {
+              background-position-x: -64px;
+            }
+          }
+          &.forward {
+            background-position-x: -192px;
+          }
+          &:hover {
+            opacity: 0.8;
+            cursor: pointer;
+          }
+        }
       }
       &.center {
         display: -webkit-flex;
@@ -114,10 +137,13 @@ input {
           border-bottom: 1px solid #eee;
         }
         tr:hover {
-          background-color: #ccf;
+          cursor: pointer;
+        }
+        td:nth-child(1) {
+          width: 18px;
         }
         .playing {
-          background: #999;
+          background: url(../img/playing.png) no-repeat;
         }
       }
     }

@@ -16,7 +16,7 @@ limitations under the License.
 Author: Eiji Kitamura (agektmr@gmail.com)
 */
 var MusicDB = (function() {
-  var MEDIA_ROOT = 'filesystem:chrome-extension://'+chrome.runtime.id+'/external/drive',
+  var MEDIA_ROOT = 'filesystem:'+chrome.runtime.getURL('/external/drive'),
       db,
       fs,
       ready = false,
@@ -29,6 +29,10 @@ var MusicDB = (function() {
       remove_queue = [];
 
   chrome.syncFileSystem.requestFileSystem(function(_fs) {
+    if (chrome.runtime.lastError) {
+      // TODO: catch at somewhere
+      throw 'SyncFileSystem Error: '+chrome.runtime.lastError.message;
+    }
     console.log('fs initialized');
     ready = true;
     fs = _fs;

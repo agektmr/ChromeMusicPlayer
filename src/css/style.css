@@ -49,6 +49,29 @@ input {
   -webkit-justify-content: flex-start;
   -webkit-align-items: center;
 }
+.app-container .app-control div.left .btn {
+  margin: 0 3px;
+  border: 0px;
+  width: 32px;
+  height: 32px;
+  background: url(../img/buttons.png) no-repeat;
+}
+.app-container .app-control div.left .btn.backward {
+  background-position-x: -128px;
+}
+.app-container .app-control div.left .btn.play {
+  background-position-x: 0px;
+}
+.app-container .app-control div.left .btn.play.playing {
+  background-position-x: -64px;
+}
+.app-container .app-control div.left .btn.forward {
+  background-position-x: -192px;
+}
+.app-container .app-control div.left .btn:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
 .app-container .app-control div.center {
   display: -webkit-flex;
   -webkit-flex-flow: column nowrap;
@@ -117,8 +140,11 @@ input {
   border-bottom: 1px solid #eee;
 }
 .app-container .app-main .app-musiclist table tr:hover {
-  background-color: #ccf;
+  cursor: pointer;
+}
+.app-container .app-main .app-musiclist table td:nth-child(1) {
+  width: 18px;
 }
 .app-container .app-main .app-musiclist table .playing {
-  background: #999;
+  background: url(../img/playing.png) no-repeat;
 }

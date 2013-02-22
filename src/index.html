@@ -16,9 +16,9 @@
     <div class="app-container" ng-controller="MediaControlCtrl">
       <div class="app-control">
         <div class="left">
-          <button class="btn" ng-click="backward()">&lt;&lt;</button>
-          <button class="btn" ng-click="play()">{{status}}</button>
-          <button class="btn" ng-click="forward()">&gt;&gt;</button>
+          <button class="backward btn" ng-click="backward()"></button>
+          <button class="play btn" ng-class="{playing:status=='Pause'}" ng-click="play()"></button>
+          <button class="forward btn" ng-click="forward()"></button>
           <input type="range" min="0" step="0.01" max="1" style="width:100px" ng-change="volume_change()" ng-model="volume">
         </div>
         <div class="center">
@@ -31,6 +31,7 @@
           </div>
         </div>
         <div class="right">
+          <img src="img/search.png" alt="">
           <input type="search" ng-model="query" placeholder="Search Music">
         </div>
       </div>
