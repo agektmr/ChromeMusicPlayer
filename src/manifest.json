@@ -23,6 +23,7 @@
         "js/filer.js",
         "js/database.js",
         "js/MusicLoader.js",
+        "js/InfoManager.js",
         "js/background.js",
         "js/id3/src/stringutils.js",
         "js/id3/src/bufferedbinaryajax.js",

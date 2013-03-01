@@ -209,19 +209,15 @@ console.log(info.name, 'added to iDB');
     }
   };
 
-  var MusicDB = function() {
-  };
-
+  var MusicDB = function() {};
   MusicDB.prototype = {
     onprogress: null,
     oncomplete: null,
     onerror: null,
-    updateQuotaAndUsage: function(callback) {
-      var that = this;
+    updateQuotaAndUsage: function() {
       chrome.syncFileSystem.getUsageAndQuota(fs, function(storageInfo) {
-        that.usage = storageInfo.usageBytes;
-        that.quota = storageInfo.quotaBytes;
-        callback();
+        QuotaManager.usage = storageInfo.usageBytes;
+        QuotaManager.quota = storageInfo.quotaBytes;
       });
     },
     getAll: function(callback, error) {
@@ -294,13 +290,10 @@ console.log(info.name, 'added to iDB');
         });
       }
     },
-    removeAll: function(callback) {
+    removeAll: function() {
       var that = this;
       var transaction = db.transaction(['music'], 'readwrite');
-      transaction.oncomplete = function() {
-        console.info('deleted all music!');
-        if (typeof that.oncomplete === 'function') that.oncomplete();
-      };
+      transaction.oncomplete = this.oncomplete;
       var music = transaction.objectStore('music');
       var req = music.openCursor();
       req.onsuccess = function(e) {

@@ -9,19 +9,20 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/angular.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/PlayListManager.js"></script>
+    <script src="js/InfoManager.js"></script>
     <script src="js/controllers.js"></script>
-    <script src="js/audioplayer.js"></script>
   </head>
   <body>
     <div class="app-container" ng-controller="MediaControlCtrl">
       <div class="app-control">
         <div class="left">
           <button class="backward btn" ng-click="backward()"></button>
-          <button class="play btn" ng-class="{playing:status=='Pause'}" ng-click="play()"></button>
+          <button class="play btn" ng-class="{playing:playing}" ng-click="play()"></button>
           <button class="forward btn" ng-click="forward()"></button>
-          <input type="range" min="0" step="0.01" max="1" style="width:100px" ng-change="volume_change()" ng-model="volume">
+          <input type="range" min="0" step="0.01" max="1" style="width:100px" ng-model="volume">
         </div>
-        <div class="center">
+        <div class="center" ng-controller="InfoManagerCtrl">
           <div>{{info.title}}</div>
           <div>{{info.artist}} - {{info.album}}</div>
           <div class="progress">
@@ -38,7 +39,7 @@
       <div class="app-main">
         <div class="app-sidebar">
           Data usage:
-          <meter value="{{usage}}" min="0" high="{{quota/10*9}}" max="{{quota}}"></meter></br>
+          <meter value="{{quota.usage}}" min="0" high="{{quota.quota/10*9}}" max="{{quota.quota}}" ng-controller="QuotaManagerCtrl"></meter></br>
           <div class="artwork">
             <img src="{{info.artwork || 'img/artwork.png'}}" alt="">
           </div>
@@ -49,7 +50,7 @@
           </div>
         </div>
         <div class="app-musiclist">
-          <table class="table">
+          <table class="table table-hover">
             <thead>
               <tr>
                 <th>&nbsp;</th>
@@ -59,9 +60,9 @@
                 <th>Track</th>
               </tr>
             </thead>
-            <tbody style="">
-              <tr ng-repeat="item in list | filter:query" ng-click="index()" ng-dblclick="index_and_play()" ng-controller="MediaCtrl">
-                <td ng-class="{playing:player_index==$index}"></td>
+            <tbody>
+              <tr ng-repeat="item in list | filter:query" ng-class="{selected:$index==selected}" ng-click="select($index)" ng-dblclick="index_and_play()" ng-controller="MediaCtrl">
+                <td ng-class="{playing:$index==cursor}"></td>
                 <td>{{item.title}}</td>
                 <td>{{item.artist}}</td>
                 <td>{{item.album}}</td>

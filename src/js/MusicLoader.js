@@ -36,32 +36,27 @@ console.log('removing music from remote:', fileInfo.fileEntry);
     }
   });
 
-  db.onprogress = function(info) {
-    MusicLoader.status = MusicLoader.SAVE_COMPLETE;
-    webkitNotifications.createNotification(info.artwork || '', '"'+info.title+'" Loaded', info.artist+'-'+info.album).show();
-    if (typeof MusicLoader.onprogress == 'function') {
-      var progress = MusicLoader.handling_files - db.getQueueLength();
-      info.title = 'Loading "'+info.title+'" ('+progress+'/'+MusicLoader.handling_files+')';
-      info.progress = ~~(progress / MusicLoader.handling_files * 100);
-      db.updateQuotaAndUsage(function() {
-        MusicLoader.usage = db.usage;
-        MusicLoader.quota = db.quota;
-        MusicLoader.onprogress(info);
-      });
-    }
-  };
-  db.oncomplete = function() {
-    MusicLoader.status = 0;
-    MusicLoader.handling_files = 0;
-    if (typeof MusicLoader.oncomplete == 'function') {
-      MusicLoader.oncomplete();
-    }
-  };
-  db.onerror = function() {
-    if (typeof MusicLoader.onerror == 'function') {
-      MusicLoader.onerror();
-    }
-  };
+  // db.onprogress = function(info) {
+  //   MusicLoader.status = MusicLoader.SAVE_COMPLETE;
+  //   webkitNotifications.createNotification(info.artwork || '', '"'+info.title+'" Loaded', info.artist+'-'+info.album).show();
+  //   var progress = MusicLoader.handling_files - db.getQueueLength();
+  //   InfoManager.title = 'Loading...';
+  //   InfoManager.artist = info.title;
+  //   InfoManager.album = progress + '/' + MusicLoader.handling_files;
+  //   InfoManager.progress = ~~(progress / MusicLoader.handling_files * 100);
+  //   db.updateQuotaAndUsage(function() {
+  //     QuotaManager.quota = db.quota;
+  //     QuotaManager.usage = db.usage;
+  //   });
+  // };
+  // db.onerror = function() {
+  //   InfoManager.title = 'Error!';
+  //   InfoManager.artist = '';
+  //   InfoManager.album = '';
+  //   InfoManager.current = 0;
+  //   InfoManager.duration = 0;
+  //   InfoManager.progress = 100;
+  // };
 
   var createListFromFS = function(root) {
     filer.ls(root, function(entries) {
@@ -71,9 +66,6 @@ console.log('removing music from remote:', fileInfo.fileEntry);
           createListFromFS(entry);
         } else {
           MusicLoader.handling_files++;
-          if (typeof MusicLoader.onprogress == 'function') {
-            MusicLoader.onprogress();
-          }
           db.add(entry);
         }
       });
@@ -83,13 +75,32 @@ console.log('removing music from remote:', fileInfo.fileEntry);
   return {
     RETRIEVE_COMPLETE: 1,
     SAVE_COMPLETE: 2,
-    quota: 0,
-    usage: 0,
     status: 0,
     handling_files: 0,
-    onprogress: null,
-    oncomplete: null,
-    loadLocalMusics: function() {
+    loadLocalMusics: function(progress_callback, complete_callback, error_callback) {
+      db.onprogress = function(info) {
+        db.updateQuotaAndUsage();
+        if (typeof progress_callback === 'function') {
+          var progress = MusicLoader.handling_files - db.getQueueLength();
+          info.album = progress + '/' + MusicLoader.handling_files;
+          info.progress = ~~(progress / MusicLoader.handling_files * 100);
+          progress_callback(info);
+        }
+      };
+      db.oncomplete = function() {
+        MusicLoader.status = 0;
+        MusicLoader.handling_files = 0;
+        db.updateQuotaAndUsage();
+        if (typeof complete_callback === 'function') {
+          complete_callback();
+        }
+      };
+      db.onerror    = function() {
+        if (typeof error_callback === 'function') {
+          error_callback();
+        }
+      };
+
       chrome.mediaGalleries.getMediaFileSystems({
         interactive: 'if_needed'
       }, function(localfilesystem) {
@@ -97,15 +108,31 @@ console.log('removing music from remote:', fileInfo.fileEntry);
           var metadata = chrome.mediaGalleries.getMediaFileSystemMetadata(fs);
           if (metadata.name === 'Music') {
             MusicLoader.status = MusicLoader.RETRIEVE_COMPLETE;
-            if (typeof MusicLoader.onprogress == 'function') {
-              MusicLoader.onprogress(null);
-            }
             createListFromFS(fs.root);
           }
         });
       });
     },
-    addMusics: function(fileEntry) {
+    addMusics: function(fileEntry, progress_callback, complete_callback, error_callback) {
+      db.onprogress = function() {
+        db.updateQuotaAndUsage();
+        if (typeof progress_callback === 'function') {
+          progress_callback();
+        }
+      };
+      db.oncomplete = function() {
+        MusicLoader.status = 0;
+        MusicLoader.handling_files = 0;
+        db.updateQuotaAndUsage();
+        if (typeof complete_callback === 'function') {
+          complete_callback();
+        }
+      };
+      db.onerror    = function() {
+        if (typeof error_callback === 'function') {
+          error_callback();
+        }
+      };
       if (fileEntry.isFile) {
         // directory add to queue if file
         db.add(fileEntry);
@@ -115,10 +142,14 @@ console.log('removing music from remote:', fileInfo.fileEntry);
       }
     },
     getAllMusics: function(callback) {
-      db.getAll(callback);
+      db.getAll(function(result) {
+        db.updateQuotaAndUsage();
+        callback(result);
+      });
     },
     dismissAllMusics: function(callback) {
-      db.removeAll(callback);
+      db.oncomplete = callback;
+      db.removeAll();
     }
   };
 })();

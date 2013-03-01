@@ -15,92 +15,108 @@ limitations under the License.
 
 Author: Eiji Kitamura (agektmr@gmail.com)
 */
-app.controller('MediaControlCtrl', function($scope, control) {
-  $scope.player_index = -1;
-  $scope.control = control;
-  $scope.status = PlayListManager.status ? 'Pause' : 'Play';
+app.value('loader', MusicLoader);
+app.value('player', PlayListManager);
+app.value('info',   InfoManager);
+app.value('quota',  QuotaManager);
+
+app.controller('MediaControlCtrl', function($scope, loader, player) {
+  $scope.playing = player.playing;
   $scope.query = '';
-  $scope.volume = PlayListManager.volume;
-  $scope.list = [];
-  $scope.quota = 0;
-  $scope.usage = 0;
+  $scope.cursor = player.cursor;
+  $scope.volume = player.volume;
+  $scope.$watch('volume', function() {
+    if (player.player) {
+      player.player.player.volume = $scope.volume;
+    }
+    player.volume = $scope.volume;
+  });
 
-  $scope.info = {
-    title:    '',
-    artist:   '',
-    album:    '',
-    artwork:  '',
-    current:  0,
-    duration: 0,
-    progress: 0
-  };
-
-  $scope.play = function(index) {
-    PlayListManager.playStop(index);
-    $scope.player_index = PlayListManager.index;
-    $scope.status = PlayListManager.status ? 'Pause' : 'Play';
+  $scope.play = function(cursor) {
+    $scope.cursor = cursor;
+    player.playStop(cursor);
+    $scope.playing = player.playing;
   };
   $scope.backward = function() {
-    $scope.control.cursor = $scope.player_index >= 0 ? ($scope.player_index-1) : 0;
-    if (PlayListManager.status === PlayListManager.PLAYING) {
-      PlayListManager.stop();
-      $scope.play($scope.control.cursor);
+    $scope.cursor = $scope.cursor >= 0 ? ($scope.cursor-1) : 0;
+    if ($scope.playing) {
+      player.stop();
+      $scope.play($scope.cursor);
     }
   };
   $scope.forward = function() {
-    $scope.control.cursor = $scope.player_index < $scope.list.length ? ($scope.player_index+1) : $scope.list.length;
-    if (PlayListManager.status === PlayListManager.PLAYING) {
-      PlayListManager.stop();
-      $scope.play($scope.control.cursor);
+    $scope.cursor = $scope.cursor < $scope.list.length ? ($scope.cursor+1) : $scope.list.length;
+    if ($scope.playing) {
+      player.stop();
+      $scope.play($scope.cursor);
     }
   };
-  $scope.volume_change = function() {
-    PlayListManager.setVolume($scope.volume);
-  };
+
   $scope.reload = function() {
-    MusicLoader.getAllMusics(function(list) {
-      PlayListManager.setPlayList(list);
-      $scope.list = PlayListManager.list;
+    loader.getAllMusics(function(list) {
+      player.setPlayList(list);
+      $scope.list = player.list;
       $scope.$apply();
     });
   };
   $scope.load_local_music = function() {
     $scope.list = [];
-    MusicLoader.oncomplete = function() {
+    loader.loadLocalMusics(function(info) {
+      webkitNotifications.createNotification(info.artwork || '', '"'+info.title+'" Loaded', info.artist+'-'+info.album).show();
+      InfoManager.title = 'Loading...';
+      InfoManager.artist = info.title;
+      InfoManager.album = info.album;
+      InfoManager.progress = info.progress;
+      $scope.$apply();
+    }, function(list) {
+      InfoManager.title = 'All your local musics are imported.';
+      InfoManager.artist = '';
+      InfoManager.album = '';
+      InfoManager.current = 0;
+      InfoManager.duration = 0;
+      InfoManager.progress = 100;
       $scope.reload();
-    };
-    MusicLoader.loadLocalMusics();
+    });
   };
   $scope.load_music = function(e) {
-    var item = e.dataTransfer.items[0];
-    if (item) {
-      var fileEntry = item.webkitGetAsEntry();
-      MusicLoader.addMusics(fileEntry);
-    }
     e.preventDefault();
+    Array.prototype.forEach.call(e.dataTransfer.items, function(item) {
+      if (item) {
+        loader.addMusics(item.webkitGetAsEntry(), function() {
+          webkitNotifications.createNotification(info.artwork || '', '"'+info.title+'" Loaded', info.artist+'-'+info.album).show();
+          InfoManager.title = 'Loading...';
+          InfoManager.artist = info.title;
+          InfoManager.album = info.album;
+          InfoManager.progress = info.progress;
+          $scope.$apply();
+        }, function() {
+          InfoManager.title = 'Dropped music is imported.';
+          InfoManager.artist = '';
+          InfoManager.album = '';
+          InfoManager.current = 0;
+          InfoManager.duration = 0;
+          InfoManager.progress = 100;
+          $scope.$apply();
+        });
+      }
+    });
   };
-  $scope.dismiss_music = MusicLoader.dismissAllMusics;
-  $scope.update = function(info) {
-    $scope.info = info;
-    delete info; // TODO: I don't like this
-    $scope.quota = MusicLoader.quota;
-    $scope.usage = MusicLoader.usage;
-    $scope.reload();
+  $scope.dismiss_music = function() {
+    loader.dismissAllMusics(function(list) {
+      InfoManager.title = 'All your local musics are dismissed.';
+      InfoManager.artist = '';
+      InfoManager.album = '';
+      InfoManager.current = 0;
+      InfoManager.duration = 0;
+      InfoManager.progress = 100;
+      player.setPlayList([]);
+      $scope.list = player.list;
+      $scope.$apply();
+    });
   };
-  MusicLoader.onprogress = $scope.update;
-  MusicLoader.oncomplete = function() {
-    $scope.quota = MusicLoader.quota;
-    $scope.usage = MusicLoader.usage;
-    $scope.reload();
-  };
-  PlayListManager.onprogress = function(info) {
-    $scope.info = info;
-    delete info;
-    $scope.$apply();
-  };
-  MusicLoader.onerror = function() {
-    $scope.title = 'Error loading: "'+info.title+'"';
-    $scope.reload();
+
+  $scope.select = function(selected) {
+    $scope.selected = selected;
   };
   $scope.reload();
 
@@ -113,14 +129,25 @@ app.controller('MediaControlCtrl', function($scope, control) {
   list.ondrop = $scope.load_music;
 });
 
-app.controller('MediaCtrl', function($scope, control) {
-  $scope.control = control;
-  $scope.index = function() {
-    control.cursor = $scope.$index;
+app.controller('InfoManagerCtrl', function($scope, info) {
+  $scope.info = info;
+  info.onupdate = function() {
+    $scope.info = info;
+    $scope.$apply();
   };
+});
+
+app.controller('QuotaManagerCtrl', function($scope, quota) {
+  $scope.quota = quota;
+  quota.onupdate = function() {
+    $scope.quota = quota;
+    $scope.$apply();
+  };
+});
+
+app.controller('MediaCtrl', function($scope, player) {
   $scope.index_and_play = function() {
-    control.cursor = $scope.$index;
-    PlayListManager.stop();
-    $scope.play($scope.control.cursor);
+    player.stop();
+    $scope.play($scope.$index);
   };
 });

@@ -16,10 +16,3 @@ limitations under the License.
 Author: Eiji Kitamura (agektmr@gmail.com)
 */
 var app = angular.module('ChromeMusicPlayer', []);
-
-app.value('control', {
-  cursor: 0,
-  playing: false,
-  volume: 100
-});
-
