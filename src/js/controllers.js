@@ -36,6 +36,7 @@ app.controller('MediaControlCtrl', function($scope, loader, player) {
     $scope.cursor = cursor;
     player.playStop(cursor);
     $scope.playing = player.playing;
+    $scope.artwork = player.player.info.artwork;
   };
   $scope.backward = function() {
     $scope.cursor = $scope.cursor >= 0 ? ($scope.cursor-1) : 0;

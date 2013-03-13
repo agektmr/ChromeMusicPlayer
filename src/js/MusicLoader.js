@@ -36,28 +36,6 @@ console.log('removing music from remote:', fileInfo.fileEntry);
     }
   });
 
-  // db.onprogress = function(info) {
-  //   MusicLoader.status = MusicLoader.SAVE_COMPLETE;
-  //   webkitNotifications.createNotification(info.artwork || '', '"'+info.title+'" Loaded', info.artist+'-'+info.album).show();
-  //   var progress = MusicLoader.handling_files - db.getQueueLength();
-  //   InfoManager.title = 'Loading...';
-  //   InfoManager.artist = info.title;
-  //   InfoManager.album = progress + '/' + MusicLoader.handling_files;
-  //   InfoManager.progress = ~~(progress / MusicLoader.handling_files * 100);
-  //   db.updateQuotaAndUsage(function() {
-  //     QuotaManager.quota = db.quota;
-  //     QuotaManager.usage = db.usage;
-  //   });
-  // };
-  // db.onerror = function() {
-  //   InfoManager.title = 'Error!';
-  //   InfoManager.artist = '';
-  //   InfoManager.album = '';
-  //   InfoManager.current = 0;
-  //   InfoManager.duration = 0;
-  //   InfoManager.progress = 100;
-  // };
-
   var createListFromFS = function(root) {
     filer.ls(root, function(entries) {
       if (entries.length === 0) return;

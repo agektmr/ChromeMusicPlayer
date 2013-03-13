@@ -41,7 +41,7 @@
           Data usage:
           <meter value="{{quota.usage}}" min="0" high="{{quota.quota/10*9}}" max="{{quota.quota}}" ng-controller="QuotaManagerCtrl"></meter></br>
           <div class="artwork">
-            <img src="{{info.artwork || 'img/artwork.png'}}" alt="">
+            <img src="{{artwork || 'img/artwork.png'}}" alt="">
           </div>
           <div class="controls">
             <input type="button" class="btn" value="Reload" placeholder="" ng-click="reload()"><br/>

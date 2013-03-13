@@ -26,5 +26,6 @@ chrome.app.runtime.onLaunched.addListener(function() {
   }, function(win) {
     win.contentWindow.MusicLoader = MusicLoader;
     win.contentWindow.InfoManager = InfoManager;
+    win.contentWindow.QuotaManager = QuotaManager;
   });
 });
