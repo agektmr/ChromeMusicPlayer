@@ -16,7 +16,7 @@ limitations under the License.
 Author: Eiji Kitamura (agektmr@gmail.com)
 */
 var MusicDB = (function() {
-  var MEDIA_ROOT = 'filesystem:'+chrome.runtime.getURL('/external/drive'),
+  var MEDIA_ROOT = 'filesystem:'+chrome.runtime.getURL('/external/syncfs'),
       db,
       fs,
       ready = false,
